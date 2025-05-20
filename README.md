@@ -5,6 +5,6 @@ An online application designed to help organizers plan and manage various types 
 ## 📁 Technologies Used
 
 - **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Node.js, Express.js
+- **Backend:** Node.js
 - **Database:** MongoDB
 - **Project Management:** Miro, GitHub, Google Docs
