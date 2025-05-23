@@ -19,7 +19,7 @@ body {
     text-align: center;
     background-color: #f4f4f4;
     min-height: 100vh;
-    background-image: url(back.avif);
+    background-image: url(../images/back.avif);
     padding: 0px;
 }
 
