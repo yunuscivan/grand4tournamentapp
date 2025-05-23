@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <nav>
+    <h2>{Grand4}</h2>
+    <ul id="nav-links">
+      <li><a href="#">Tournament List</a></li>
+      <li><a href="#">Tournament Details</a></li>
+      <li><a href="#">Player Dashboard</a></li>
+      <li><a href="#">Admin Dashboard</a></li>
+      <li><a href="#">Login</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <h2>Admin Dashboard</h2>
+         <!-- Existing Tournaments -->
+        <section id="existing-tournaments" style="margin-bottom: 2rem;">
+          <h3>Existing Tournaments</h3>
+          <ul id="tournament-list-display"></ul>
+        </section>
+        <a href="#" id="create-link" class="button" style="margin-top: 1rem;">+ Create New Tournament</a>
+
+        <!-- Create Tournament Form Hidden Initially -->
+        <div id="create-form-wrapper" style="display: none;">
+          <section class="tournament-form">
+            <h3>Create New Tournament</h3>
+            <form id="createTournamentForm">
+              <label for="name">Tournament Name:<input type="text" id="name" required /></label>
+
+              <label for="type">Tournament Type:
+                <select id="type" required>
+                  <option value="">--Select--</option>
+                  <option value="knockout">Knockout</option>
+                </select>
+              </label>
+
+              <label for="location">Location:<input type="text" id="location" required /></label>
+              <label for="date">Date:<input type="date" id="date" required /></label>
+
+              <label for="player-name">Player Name:<input type="text" id="player-name" /></label>
+              <label for="player-email">Player Email:<input type="email" id="player-email" /></label>
+              <button type="button" id="add-player" class="button" style="margin-bottom: 2rem;">Add Player</button>
+
+              <ul id="player-list"></ul>
+
+              <button type="submit" class="button">Create Tournament</button>
+            </form>
+          </section>
+        </div>
+
+       
+
+        <!-- Score Section (hidden) -->
+        <section id="score-entry-section" style="display: none;">
+          <h2>Enter Match Scores</h2>
+          <div id="matches-container"></div>
+          <button id="submit-scores" class="button">Submit All Scores</button>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+  
+    <footer class="footer">
+        <div class="footer-content">
+            <h3>Tournament Manager</h3>
+            <p>Effortlessly plan, manage, and track your tournaments.</p>
+            <ul class="footer-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+        <div class="footer-social">
+            <a href="#"><i class="fa fa-facebook"></i></a>
+            <a href="#"><i class="fa fa-twitter"></i></a>
+            <a href="#"><i class="fa fa-linkedin"></i></a>
+            <a href="#"><i class="fa fa-github"></i></a>
+        </div>
+        <p class="footer-copyright">© 2025 Grand4</p>
+    </footer>
+</body>
+</html>
