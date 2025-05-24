@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Player Dashboard</title>
+    <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="pdStyles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <body>
+    <nav>
+      <h2>{Grand4}</h2>
+      <ul id="nav-links">
+        <li><a href="tournament-list.html">Tournament List</a></li>
+        <li><a href="tournament-details.html">Tournament Details</a></li>
+        <li>
+          <a href="player-dashboard.html" class="active">Player Dashboard</a>
+        </li>
+        <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="player-hero">
+        <h1>Welcome, <span id="player-name">Player Name</span>!</h1>
+        <p>Your recent tournaments and results are below.</p>
+      </section>
+
+      <section class="tournament-results">
+        <h2>Your Tournaments</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Tournament Name</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Your Score</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tournament-results-body">
+            <!-- Rows with tournament data will be inserted here dynamically -->
+          </tbody>
+        </table>
+      </section>
+
+      <section class="profile-edit">
+        <h2>Edit Profile</h2>
+        <form id="profile-form">
+          <label for="edit-name">Name:</label>
+          <input type="text" id="edit-name" required />
+
+          <label for="edit-email">Email:</label>
+          <input type="email" id="edit-email" required />
+
+          <button type="submit" class="button">Save Changes</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-content">
+        <h3>Tournament Manager</h3>
+        <p>Effortlessly plan, manage, and track your tournaments.</p>
+        <ul class="footer-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-social">
+        <a href="#"><i class="fa fa-facebook"></i></a>
+        <a href="#"><i class="fa fa-twitter"></i></a>
+        <a href="#"><i class="fa fa-linkedin"></i></a>
+        <a href="#"><i class="fa fa-github"></i></a>
+      </div>
+      <p class="footer-copyright">© 2025 Grand4</p>
+    </footer>
+
+    <script src="js/pdJS.js"></script>
+  </body>
+</html>
