@@ -1,5 +1,18 @@
 /* Player Dashboard specific styles */
 
+body {
+  background-image: url('../images/pexels-sebastian-411207.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+
+
 .player-hero {
   background-color: var(--main-color);
   color: #f0f0f2;
