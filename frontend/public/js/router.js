@@ -1,69 +1,135 @@
 // Router class to handle navigation
 class Router {
   constructor() {
-    this.views = ["login", "admin", "forgotPassword", "signup"];
-    this.defaultView = "login";
+    this.routes = {
+      home: "#home",
+      tournaments: "#tournaments",
+      admin: "#admin",
+      "player-dashboard": "#player-dashboard",
+      contact: "#contact",
+    };
 
-    // Handle browser back/forward buttons
-    window.addEventListener("popstate", (e) => {
-      this.showView(e.state?.view || this.defaultView);
-    });
+    // Handle initial route
+    this.handleRoute();
 
-    // Check authentication on load
-    this.checkAuthAndRoute();
+    // Listen for hash changes
+    window.addEventListener("hashchange", () => this.handleRoute());
   }
 
-  checkAuthAndRoute() {
-    const token = localStorage.getItem("token");
-    const userType = localStorage.getItem("userType");
-    const currentView = this.getCurrentView();
+  navigateTo(route) {
+    window.location.hash = this.routes[route] || this.routes.home;
+  }
 
-    if (token) {
-      // User is logged in
-      if (
-        currentView === "login" ||
-        currentView === "forgotPassword" ||
-        currentView === "signup"
-      ) {
-        // Redirect to appropriate dashboard based on user type
-        this.showView(userType === "admin" ? "admin" : "player");
+  handleRoute() {
+    const hash = window.location.hash || "#home";
+    const views = document.querySelectorAll(".view");
+
+    // Hide all views
+    views.forEach((view) => {
+      view.style.display = "none";
+    });
+
+    // Special handling for admin route
+    if (hash === "#admin") {
+      // Always show admin login form first
+      document.getElementById("adminLoginView").style.display = "block";
+      document.getElementById("adminView").style.display = "none";
+      // Clear admin login form fields
+      const adminEmail = document.getElementById("adminEmail");
+      const adminPassword = document.getElementById("adminPassword");
+      if (adminEmail) adminEmail.value = "";
+      if (adminPassword) adminPassword.value = "";
+      window.scrollTo(0, 0);
+      this.updateNavigation(hash);
+      // Only show admin dashboard after successful admin login
+      if (localStorage.getItem("isAdmin") === "true") {
+        document.getElementById("adminLoginView").style.display = "none";
+        document.getElementById("adminView").style.display = "block";
       }
+      return;
+    }
+
+    // Special handling for tournaments route
+    if (hash === "#tournaments") {
+      document.getElementById("tournamentListView").style.display = "block";
+      if (typeof fetchTournaments === "function") fetchTournaments();
+      window.scrollTo(0, 0);
+      this.updateNavigation(hash);
+      return;
+    }
+
+    // Special handling for player dashboard
+    if (hash === "#player-dashboard") {
+      document.getElementById("playerDashboardView").style.display = "block";
+      if (typeof playerDashboard !== "undefined")
+        playerDashboard.loadPlayerTournaments();
+      window.scrollTo(0, 0);
+      this.updateNavigation(hash);
+      return;
+    }
+
+    // Show the selected view
+    const viewId = hash.slice(1) + "View";
+    const currentView = document.getElementById(viewId);
+
+    if (currentView) {
+      currentView.style.display = "block";
+      // Scroll to top when changing views
+      window.scrollTo(0, 0);
     } else {
-      // User is not logged in
-      if (currentView === "admin" || currentView === "player") {
-        this.showView("login");
-      }
+      // If view not found, show home
+      document.getElementById("homeView").style.display = "block";
+    }
+
+    // Update active state in navigation
+    this.updateNavigation(hash);
+  }
+
+  updateNavigation(hash) {
+    // Remove active class from all nav links
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.classList.remove("active");
+    });
+
+    // Add active class to current nav link
+    const currentLink = document.querySelector(`.nav-link[href="${hash}"]`);
+    if (currentLink) {
+      currentLink.classList.add("active");
     }
   }
 
-  getCurrentView() {
-    const hash = window.location.hash.slice(1) || this.defaultView;
-    return this.views.includes(hash) ? hash : this.defaultView;
+  isAuthenticated() {
+    return !!localStorage.getItem("token");
   }
 
-  showView(viewName) {
-    // Hide all views
-    this.views.forEach((view) => {
-      const element = document.getElementById(`${view}View`);
-      if (element) {
-        element.style.display = "none";
-      }
+  isAdmin() {
+    return localStorage.getItem("userType") === "admin";
+  }
+
+  isSelectedPlayer() {
+    return localStorage.getItem("isSelectedPlayer") === "true";
+  }
+
+  init() {
+    // Add click handlers for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const route = e.target.getAttribute("href").slice(1);
+        this.navigateTo(route);
+      });
     });
 
-    // Show requested view
-    const viewElement = document.getElementById(`${viewName}View`);
-    if (viewElement) {
-      viewElement.style.display = "";
-      window.location.hash = viewName;
-      window.history.pushState({ view: viewName }, "", `#${viewName}`);
+    // Check authentication and redirect if necessary
+    if (
+      !this.isAuthenticated() &&
+      !["login", "admin-login"].includes(window.location.hash.slice(1))
+    ) {
+      this.navigateTo("login");
     }
   }
 }
 
 // Initialize router
 const router = new Router();
-
-// Function to be called from HTML
-function showView(viewName) {
-  router.showView(viewName);
-}
+document.addEventListener("DOMContentLoaded", () => router.init());

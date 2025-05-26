@@ -11,43 +11,53 @@
     />
   </head>
   <body>
-    <button class="theme-toggle" id="themeToggle">
-      <span class="light-text">🌙 Dark Mode</span>
-      <span class="dark-text" style="display: none">☀️ Light Mode</span>
-    </button>
+    <div class="theme-toggle-wrapper">
+      <button class="theme-toggle" id="themeToggle">
+        <span class="light-text"><i class="fas fa-moon"></i></span>
+        <span class="dark-text" style="display: none"
+          ><i class="fas fa-sun"></i
+        ></span>
+      </button>
+    </div>
 
-    <!-- Header -->
-    <header class="main-header" style="display: none">
-      <nav>
-        <h2>{Grand4}</h2>
-        <ul id="nav-links">
-          <li><a href="#tournaments">Tournament List</a></li>
-          <li><a href="#tournament-details">Tournament Details</a></li>
-          <li><a href="#player">Player Dashboard</a></li>
-          <li><a href="#admin">Admin Dashboard</a></li>
-          <li><a href="#" id="logoutBtn">Logout</a></li>
-        </ul>
-        <button class="menu-button" onclick="toggleMenu()">☰</button>
-      </nav>
-    </header>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-brand">Tournament System</div>
+      <button class="nav-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="nav-menu">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#tournaments" class="nav-link">Tournaments</a></li>
+        <li><a href="#admin" class="nav-link">Admin</a></li>
+        <li><a href="#player-dashboard" class="nav-link">Player</a></li>
+        <li><a href="#contact" class="nav-link">Contact Us</a></li>
+        <li><a href="#" id="logoutBtn" class="nav-link">Logout</a></li>
+        <li class="theme-toggle-mobile">
+          <button
+            class="theme-toggle"
+            id="themeToggleMobile"
+            style="display: none"
+          >
+            <span class="light-text"><i class="fas fa-moon"></i></span>
+            <span class="dark-text" style="display: none"
+              ><i class="fas fa-sun"></i
+            ></span>
+          </button>
+        </li>
+      </ul>
+    </nav>
 
     <!-- Login View -->
     <div id="loginView" class="view">
       <div class="login-container">
-        <form class="login-form" id="loginForm">
-          <h2>Tournament System</h2>
-          <div class="user-type-toggle">
-            <button
-              type="button"
-              class="user-type-btn active"
-              data-type="player"
-            >
-              Player Login
-            </button>
-            <button type="button" class="user-type-btn" data-type="admin">
-              Admin Login
-            </button>
-          </div>
+        <form id="loginForm" class="login-form">
+          <h2>Welcome Back</h2>
+          <div
+            id="userLoginError"
+            class="error-message"
+            style="display: none"
+          ></div>
           <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" required />
@@ -57,18 +67,10 @@
             <input type="password" id="password" name="password" required />
           </div>
           <button type="submit" class="login-btn">Login</button>
-          <div class="auth-links">
-            <div class="forgot-password">
-              <a href="#" onclick="showView('forgotPassword'); return false;"
-                >Forgot Password?</a
-              >
-            </div>
-            <div class="signup-link">
-              <span>Don't have an account? </span>
-              <a href="#" onclick="showView('signup'); return false;"
-                >Sign Up</a
-              >
-            </div>
+          <div class="form-footer">
+            <p>
+              Don't have an account? <a href="#" class="signup-link">Sign Up</a>
+            </p>
           </div>
         </form>
       </div>
@@ -77,20 +79,8 @@
     <!-- Sign Up View -->
     <div id="signupView" class="view" style="display: none">
       <div class="login-container">
-        <form class="login-form" id="signupForm">
+        <form id="signupForm" class="login-form">
           <h2>Create Account</h2>
-          <div class="user-type-toggle">
-            <button
-              type="button"
-              class="user-type-btn active"
-              data-type="player"
-            >
-              Player Account
-            </button>
-            <button type="button" class="user-type-btn" data-type="admin">
-              Admin Account
-            </button>
-          </div>
           <div class="form-group">
             <label for="signupName">Full Name</label>
             <input type="text" id="signupName" name="name" required />
@@ -118,12 +108,39 @@
             />
           </div>
           <button type="submit" class="login-btn">Create Account</button>
-          <div class="auth-links">
-            <div class="login-link">
-              <span>Already have an account? </span>
-              <a href="#" onclick="showView('login'); return false;">Login</a>
-            </div>
+          <div class="form-footer">
+            <p>
+              Already have an account? <a href="#" class="login-link">Login</a>
+            </p>
           </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Login View -->
+    <div id="adminLoginView" class="view" style="display: none">
+      <div class="login-container">
+        <form id="adminLoginForm" class="login-form">
+          <h2>Admin Access Only</h2>
+          <div
+            id="adminLoginError"
+            class="error-message"
+            style="display: none"
+          ></div>
+          <div class="form-group">
+            <label for="adminEmail">Admin Email</label>
+            <input type="email" id="adminEmail" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <input
+              type="password"
+              id="adminPassword"
+              name="password"
+              required
+            />
+          </div>
+          <button type="submit" class="login-btn">Login as Admin</button>
         </form>
       </div>
     </div>
@@ -133,99 +150,115 @@
       <!-- Home View -->
       <div id="homeView" class="view">
         <section class="hero">
-          <div class="hero-text">
-            <h1>Welcome to Tournament Manager</h1>
-            <h2>Manage Your Tournaments Easily</h2>
-            <p>
-              Plan, track, and update your tournament <br />details with ease.
-            </p>
-          </div>
-          <div class="center-button">
-            <button onclick="showView('createTournament')">
-              Create Tournament
+          <div class="hero-content">
+            <h1>Welcome to Tournament System</h1>
+            <p>Organize and participate in exciting tournaments with ease!</p>
+            <button
+              class="cta-button"
+              onclick="router.navigateTo('tournaments')"
+            >
+              Join Tournament
             </button>
           </div>
         </section>
 
-        <section class="info">
-          <div>
-            <h2>What is Tournament Manager?</h2>
-            <p>
-              Tournament Manager is an all-in-one platform that makes organizing
-              and managing tournaments effortless. Whether you're planning a
-              knockout-style competition or a round-robin event, this app
-              streamlines everything from scheduling matches to tracking
-              results.
-            </p>
-          </div>
-          <div class="image">
-            <img src="images/tournament-list.jpg" alt="Tournament List" />
+        <section class="features">
+          <h2>Main Features</h2>
+          <div class="features-grid">
+            <div class="feature-card">
+              <i class="fas fa-trophy"></i>
+              <h3>Tournament Management</h3>
+              <p>
+                Create and manage tournaments with up to 8 players. Perfect for
+                small to medium-sized competitions.
+              </p>
+              <ul class="feature-list">
+                <li>Easy tournament creation</li>
+                <li>Automatic bracket generation</li>
+                <li>Real-time updates</li>
+                <li>Match scheduling</li>
+              </ul>
+            </div>
+
+            <div class="feature-card">
+              <i class="fas fa-users"></i>
+              <h3>Player Dashboard</h3>
+              <p>
+                A dedicated space for players to manage their tournament
+                participation.
+              </p>
+              <ul class="feature-list">
+                <li>View upcoming matches</li>
+                <li>Submit match results</li>
+                <li>Track tournament progress</li>
+                <li>Receive notifications</li>
+              </ul>
+            </div>
+
+            <div class="feature-card">
+              <i class="fas fa-crown"></i>
+              <h3>Admin Controls</h3>
+              <p>
+                Powerful tools for tournament administrators to ensure smooth
+                operation.
+              </p>
+              <ul class="feature-list">
+                <li>Approve match results</li>
+                <li>Manage participants</li>
+                <li>Monitor tournament status</li>
+                <li>Send announcements</li>
+              </ul>
+            </div>
+
+            <div class="feature-card">
+              <i class="fas fa-bell"></i>
+              <h3>Notifications</h3>
+              <p>Stay updated with our comprehensive notification system.</p>
+              <ul class="feature-list">
+                <li>Email notifications</li>
+                <li>Match reminders</li>
+                <li>Result updates</li>
+                <li>Tournament announcements</li>
+              </ul>
+            </div>
           </div>
         </section>
 
-        <section class="list-section">
-          <div>
-            <h2>What Does It Offer?</h2>
-            <ul class="list">
-              <li class="list-text">
-                <strong>Easy Tournament Scheduling:</strong> Plan and run
-                various types of tournaments effortlessly.
-              </li>
-              <li class="list-text">
-                <strong>Player Management:</strong> Invite, track participation,
-                and communicate with players in one place.
-              </li>
-              <li class="list-text">
-                <strong>Real-Time Brackets:</strong> Visually manage ongoing
-                tournaments and track results smoothly.
-              </li>
-              <li class="list-text">
-                <strong>Secure Login System:</strong> Ensure access control for
-                admins and players.
-              </li>
-              <li class="list-text">
-                <strong>Automated Updates:</strong> No more manual
-                spreadsheets—get real-time updates and notifications.
-              </li>
-              <li class="list-text">
-                <strong>Email Notifications:</strong> Stay informed with
-                automated email notifications.
-              </li>
-            </ul>
+        <section class="how-it-works">
+          <h2>How It Works</h2>
+          <div class="steps-container">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h3>Create Account</h3>
+              <p>Sign up and create your personal profile to get started.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <h3>Join Tournament</h3>
+              <p>Browse available tournaments or create your own.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <h3>Play Matches</h3>
+              <p>Compete in matches and submit your results.</p>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <h3>Win Prizes</h3>
+              <p>Progress through the brackets and win tournaments!</p>
+            </div>
           </div>
         </section>
-      </div>
 
-      <!-- Admin Dashboard View -->
-      <div id="adminView" class="view" style="display: none">
-        <nav>
-          <h1>Tournament Management System</h1>
-        </nav>
-        <main>
-          <div class="tournament-form">
-            <h2>Create New Tournament</h2>
-            <form id="tournamentForm">
-              <label for="tournamentName">Tournament Name</label>
-              <input type="text" id="tournamentName" required />
-
-              <label for="startDate">Start Date</label>
-              <input type="date" id="startDate" required />
-
-              <div id="playerEmails">
-                <label>Player Emails (8 players required)</label>
-                <div id="player-list"></div>
-                <input
-                  type="email"
-                  id="playerEmail"
-                  placeholder="Enter player email"
-                />
-                <button type="button" onclick="addPlayer()">Add Player</button>
-              </div>
-
-              <button type="submit">Create Tournament</button>
-            </form>
-          </div>
-        </main>
+        <section class="cta-section">
+          <h2>Ready to Get Started?</h2>
+          <p>
+            Join our growing community of tournament players and organizers!
+          </p>
+          <button class="cta-button" onclick="router.navigateTo('tournaments')">
+            Join Tournament Now
+          </button>
+        </section>
       </div>
 
       <!-- Tournament List View -->
@@ -234,13 +267,106 @@
       </div>
 
       <!-- Tournament Details View -->
-      <div id="tournamentDetailsView" class="view" style="display: none">
-        <!-- Tournament details content will be dynamically loaded -->
-      </div>
+      <div id="tournamentDetailsView" class="view" style="display: none"></div>
 
       <!-- Player Dashboard View -->
       <div id="playerDashboardView" class="view" style="display: none">
-        <!-- Player dashboard content will be dynamically loaded -->
+        <div class="dashboard-container player-bg">
+          <div id="playerTournaments">
+            <!-- Player tournaments will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin View -->
+      <div id="adminView" class="view" style="display: none">
+        <div class="admin-dashboard">
+          <button
+            id="adminLogoutBtn"
+            class="logout-btn"
+            style="float: right; margin-bottom: 10px"
+          >
+            Admin Logout
+          </button>
+          <div class="tournament-form">
+            <h2>Create New Tournament</h2>
+            <form id="tournamentForm">
+              <div class="form-group">
+                <label for="tournamentName">Tournament Name</label>
+                <input type="text" id="tournamentName" required />
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" required />
+              </div>
+              <div class="form-group">
+                <label for="startTime">Start Time</label>
+                <input type="time" id="startTime" required />
+              </div>
+              <div class="form-group">
+                <label>Pending Player Requests</label>
+                <div id="pending-requests-list" class="pending-requests-list">
+                  <!-- Pending player requests will be loaded here -->
+                </div>
+                <small>Select 2, 4, or 8 players for the tournament.</small>
+              </div>
+              <button
+                type="submit"
+                class="submit-btn"
+                id="createTournamentBtn"
+                disabled
+              >
+                Create Tournament
+              </button>
+            </form>
+          </div>
+          <div class="pending-results-section">
+            <h2>Pending Match Results</h2>
+            <div id="pending-results-list" class="pending-results-list">
+              <!-- Pending match results will be loaded here -->
+            </div>
+          </div>
+          <div class="tournament-list">
+            <!-- Tournament management list will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact View -->
+      <div id="contactView" class="view" style="display: none">
+        <div class="contact-container">
+          <h2>Contact Us</h2>
+          <p>Report any issues or concerns about tournaments</p>
+          <form
+            id="contactForm"
+            class="contact-form"
+            action="https://formspree.io/f/mkgrayoe"
+            method="POST"
+          >
+            <div class="form-group">
+              <label for="contactName">Your Name</label>
+              <input type="text" id="contactName" name="name" required />
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Your Email</label>
+              <input type="email" id="contactEmail" name="email" required />
+            </div>
+            <div class="form-group">
+              <label for="contactSubject">Subject</label>
+              <input type="text" id="contactSubject" name="subject" required />
+            </div>
+            <div class="form-group">
+              <label for="contactMessage">Message</label>
+              <textarea
+                id="contactMessage"
+                name="message"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -252,35 +378,34 @@
           <p>Manage your tournaments with ease</p>
         </div>
         <div class="footer-section">
-          <h3>Quick Links</h3>
-          <ul>
-            <li>
-              <a href="#" onclick="showView('home'); return false;">Home</a>
-            </li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h3>Contact Us</h3>
           <p>Email: tournament.notify@gmail.com</p>
         </div>
       </div>
-      <div class="footer-social">
-        <a href="#"><i class="fab fa-facebook"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-linkedin"></i></a>
-        <a href="#"><i class="fab fa-github"></i></a>
-      </div>
       <div class="footer-bottom">
-        <p>&copy; 2024 Tournament System. All rights reserved.</p>
+        <p>&copy; 2025 Tournament System. All rights reserved.</p>
       </div>
     </footer>
 
+    <script>
+      // Navigation toggle for mobile
+      document.querySelector(".nav-toggle").addEventListener("click", () => {
+        document.querySelector(".nav-menu").classList.toggle("active");
+      });
+
+      // Close mobile menu when clicking a link
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        link.addEventListener("click", () => {
+          document.querySelector(".nav-menu").classList.remove("active");
+        });
+      });
+    </script>
+
+    <!-- Load scripts in the correct order -->
     <script src="js/theme.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/router.js"></script>
     <script src="js/login.js"></script>
-    <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/player.js"></script>
   </body>
 </html>

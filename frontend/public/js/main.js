@@ -1,384 +1,334 @@
-// Main JavaScript functionality
+// Main application initialization
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize mobile menu
-  const menuButton = document.querySelector(".menu-button");
-  const navLinks = document.getElementById("nav-links");
-  const mainHeader = document.querySelector(".main-header");
+  // Initialize the application
+  initApp();
+  setupEventListeners();
+});
+
+function initApp() {
+  // Check authentication state
+  const isAuthenticated = checkAuthState();
+
+  // Get main elements
   const mainContent = document.getElementById("mainContent");
+  const loginView = document.getElementById("loginView");
+  const navbar = document.querySelector(".navbar");
 
-  // Tournament state management
-  let tournaments = JSON.parse(localStorage.getItem("tournaments")) || [];
-  let selectedTournament =
-    JSON.parse(localStorage.getItem("selectedTournament")) || null;
+  if (isAuthenticated) {
+    // User is logged in - show main content and navbar
+    mainContent.style.display = "block";
+    loginView.style.display = "none";
+    navbar.style.display = "flex";
 
-  // Toggle mobile menu
-  function toggleMenu() {
+    // Initialize router to handle the current route
+    router.handleRoute();
+  } else {
+    // User is not logged in - show login form
+    mainContent.style.display = "none";
+    loginView.style.display = "block";
+    navbar.style.display = "none";
+  }
+
+  // Initialize theme
+  initializeTheme();
+}
+
+function checkAuthState() {
+  return !!localStorage.getItem("token");
+}
+
+function initializeTheme() {
+  const themeToggle = document.getElementById("themeToggle");
+  const lightText = document.querySelector(".light-text");
+  const darkText = document.querySelector(".dark-text");
+
+  // Check saved theme preference
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  updateThemeToggleButton(savedTheme === "dark");
+
+  // Theme toggle click handler
+  themeToggle.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+
+    // Add transition class
+    document.documentElement.classList.add("theme-transition");
+
+    // Update theme
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+
+    // Update button appearance
+    updateThemeToggleButton(newTheme === "dark");
+
+    // Add spin animation
+    themeToggle.classList.add("theme-toggle-spin");
+
+    // Remove transition class and spin animation after transition
+    setTimeout(() => {
+      document.documentElement.classList.remove("theme-transition");
+      themeToggle.classList.remove("theme-toggle-spin");
+    }, 500);
+  });
+}
+
+function updateThemeToggleButton(isDark) {
+  const lightText = document.querySelector(".light-text");
+  const darkText = document.querySelector(".dark-text");
+
+  if (isDark) {
+    lightText.style.display = "none";
+    darkText.style.display = "inline-block";
+  } else {
+    lightText.style.display = "inline-block";
+    darkText.style.display = "none";
+  }
+}
+
+function setupEventListeners() {
+  // Logout functionality
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
+  }
+
+  // Mobile menu toggle
+  const menuButton = document.querySelector(".menu-button");
+  if (menuButton) {
+    menuButton.addEventListener("click", toggleMenu);
+  }
+}
+
+function handleLogout() {
+  // Clear local storage
+  localStorage.removeItem("token");
+  localStorage.removeItem("userType");
+
+  // Redirect to login
+  window.location.href = "#login";
+
+  // Hide header and main content
+  document.querySelector(".main-header").style.display = "none";
+  document.getElementById("mainContent").style.display = "none";
+}
+
+function toggleMenu() {
+  const navLinks = document.getElementById("nav-links");
+  if (navLinks) {
     navLinks.classList.toggle("active");
   }
+}
 
-  // Close mobile menu when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".menu-button") && !e.target.closest("#nav-links")) {
-      navLinks.classList.remove("active");
-    }
-  });
-
-  // Handle navigation
-  document.querySelectorAll("#nav-links a").forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const view = e.target.getAttribute("href").replace("#", "");
-      router.showView(view);
-      navLinks.classList.remove("active");
+// API calls
+async function fetchTournaments() {
+  try {
+    const response = await fetch("http://localhost:5000/api/tournaments", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-  });
 
-  // Handle logout
-  document.getElementById("logoutBtn").addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.removeItem("token");
-    localStorage.removeItem("userType");
-    mainHeader.style.display = "none";
-    mainContent.style.display = "none";
-    router.showView("login");
-  });
+    if (!response.ok) throw new Error("Failed to fetch tournaments");
 
-  // Check authentication on load
-  function checkAuth() {
-    const token = localStorage.getItem("token");
-    const userType = localStorage.getItem("userType");
-
-    if (token) {
-      mainHeader.style.display = "block";
-      mainContent.style.display = "block";
-      router.showView(userType === "admin" ? "admin" : "home");
-    } else {
-      mainHeader.style.display = "none";
-      mainContent.style.display = "none";
-      router.showView("login");
-    }
+    const tournaments = await response.json();
+    displayTournaments(tournaments);
+  } catch (error) {
+    console.error("Error fetching tournaments:", error);
+    showError("Failed to load tournaments. Please try again later.");
   }
+}
 
-  // Tournament List Functions
-  function addTournamentRow() {
-    const tbody = document.getElementById("tournamentBody");
-    const newRow = document.createElement("tr");
+function displayTournaments(tournaments) {
+  const container = document.getElementById("tournamentListView");
+  const tournamentListContainer = document.querySelector("#tournamentListView");
+  if (!container) return;
 
-    newRow.innerHTML = `
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td>
-        <button class="save" onclick="saveTournament(this)">Save</button>
-      </td>
+  // Use the homepage hero background for tournaments
+  tournamentListContainer.classList.add("hero-bg");
+  tournamentListContainer.classList.remove("tournament-bg");
+
+  if (!tournaments || tournaments.length === 0) {
+    container.innerHTML = `
+      <div class="tournament-empty-message">
+        <h2>There are no available or ongoing tournaments now.</h2>
+      </div>
     `;
-    tbody.appendChild(newRow);
+    return;
   }
 
-  function saveTournament(button) {
-    const row = button.parentNode.parentNode;
-    const cells = row.querySelectorAll("td");
-    const tournament = {
-      name: cells[0].innerText,
-      type: cells[1].innerText,
-      players: cells[2].innerText,
-      startDate: cells[3].innerText,
-      endDate: cells[4].innerText,
-      matches: [],
-    };
+  const userEmail = localStorage.getItem("userEmail");
+  container.innerHTML = `
+    <div class="tournament-hero-content">
+      <h1>Tournaments</h1>
+      <div class="tournament-list-hero">
+                    ${tournaments
+                      .map(
+                        (tournament) => `
+              <div class="tournament-hero-item">
+                <span class="tournament-hero-name">${tournament.name}</span>
+                <span class="tournament-hero-date">${new Date(
+                  tournament.startDate
+                ).toLocaleDateString()}</span>
+                <span class="tournament-hero-status">${tournament.status}</span>
+                <button onclick="viewTournamentDetails('${
+                  tournament._id
+                }')">View Details</button>
+                ${
+                  tournament.status === "pending" &&
+                  !(
+                    tournament.players &&
+                    tournament.players.some((p) => p.email === userEmail)
+                  )
+                    ? `<button onclick="joinTournament('${tournament._id}')">Join Tournament</button>`
+                    : ""
+                }
+              </div>
+                    `
+                      )
+                      .join("")}
+      </div>
+        </div>
+    `;
+}
 
-    tournaments.push(tournament);
-    localStorage.setItem("tournaments", JSON.stringify(tournaments));
-    renderTournamentTable();
-  }
-
-  function editTournament(index) {
-    const row = document.querySelector(
-      `#tournamentBody tr:nth-child(${index + 1})`
+async function viewTournamentDetails(tournamentId) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/tournaments/${tournamentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
     );
-    row
-      .querySelectorAll("td")
-      .forEach((cell) => (cell.contentEditable = "true"));
+
+    if (!response.ok) throw new Error("Failed to fetch tournament details");
+
+    const tournament = await response.json();
+    displayTournamentDetails(tournament);
+    // Show only the tournament details view
+    document
+      .querySelectorAll(".view")
+      .forEach((v) => (v.style.display = "none"));
+    document.getElementById("tournamentDetailsView").style.display = "block";
+  } catch (error) {
+    console.error("Error fetching tournament details:", error);
+    showError("Failed to load tournament details. Please try again later.");
+  }
+}
+
+function displayTournamentDetails(tournament) {
+  const container = document.getElementById("tournamentDetailsView");
+  if (!container) return;
+  container.classList.add("hero-bg");
+
+  // Find current round
+  const currentRound = tournament.currentRound || 1;
+  const matches = tournament.bracket || [];
+  const currentMatches = matches.filter((m) => m.round === currentRound);
+
+  // Helper to get player name/email
+  function getPlayerName(player) {
+    if (!player) return "Unknown";
+    if (typeof player === "object")
+      return player.username || player.email || "Unknown";
+    // fallback for id
+    return player;
   }
 
-  function deleteTournament(index) {
-    tournaments.splice(index, 1);
-    localStorage.setItem("tournaments", JSON.stringify(tournaments));
-    renderTournamentTable();
-  }
-
-  function searchTournament() {
-    const searchValue = document
-      .getElementById("searchInput")
-      .value.toLowerCase();
-    const filteredTournaments = tournaments.filter((t) =>
-      t.name.toLowerCase().includes(searchValue)
-    );
-    renderTournamentTable(filteredTournaments);
-  }
-
-  function renderTournamentTable(list = tournaments) {
-    const tbody = document.getElementById("tournamentBody");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    if (list.length === 0) {
-      tbody.innerHTML =
-        "<tr><td colspan='6'>No tournaments available.</td></tr>";
-    } else {
-      list.forEach((tournament, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td contenteditable="false">${tournament.name}</td>
-            <td contenteditable="false">${tournament.type}</td>
-            <td contenteditable="false">${tournament.players}</td>
-            <td contenteditable="false">${tournament.startDate}</td>
-            <td contenteditable="false">${tournament.endDate}</td>
-            <td>
-              <button class="view" onclick="viewTournamentDetails(${index})">View</button>
-              ${
-                localStorage.getItem("userType") === "admin"
-                  ? `
-                <button class="edit" onclick="editTournament(${index})">Edit</button>
-                <button class="delete" onclick="deleteTournament(${index})">Delete</button>
-              `
-                  : ""
+  let matchesHtml = "";
+  if (currentMatches.length > 0) {
+    matchesHtml = `
+      <div class="bracket-section">
+        <h3>Round ${currentRound} Matches</h3>
+        <div class="bracket-list">
+          ${currentMatches
+            .map((match, idx) => {
+              const player1 = getPlayerName(match.player1);
+              const player2 = getPlayerName(match.player2);
+              const dateStr = match.scheduledTime
+                ? new Date(match.scheduledTime).toLocaleString()
+                : "TBD";
+              let result = "";
+              if (match.result && match.result.winner) {
+                const winner = getPlayerName(match.result.winner);
+                result = `<span class='match-winner'>(Winner: ${winner})</span>`;
               }
-            </td>
-          </tr>
-        `;
-      });
-    }
-  }
-
-  // Tournament Detail Functions
-  function viewTournamentDetails(index) {
-    selectedTournament = tournaments[index];
-    localStorage.setItem(
-      "selectedTournament",
-      JSON.stringify(selectedTournament)
-    );
-    router.showView("tournament-details");
-    renderTournamentDetails();
-  }
-
-  function renderTournamentDetails() {
-    if (!selectedTournament) return;
-
-    const view = document.getElementById("tournamentDetailsView");
-    view.innerHTML = `
-      <div class="tournament-details fade-in">
-        <h2>${selectedTournament.name}</h2>
-        <div class="tournament-info">
-          <p><strong>Type:</strong> ${selectedTournament.type}</p>
-          <p><strong>Start Date:</strong> ${selectedTournament.startDate}</p>
-          <p><strong>End Date:</strong> ${selectedTournament.endDate}</p>
-        </div>
-        
-        <div class="players-section">
-          <h3>Players</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="playersBody"></tbody>
-          </table>
-          ${
-            localStorage.getItem("userType") === "admin"
-              ? `<button onclick="addPlayerRow()">Add Player</button>`
-              : ""
-          }
-        </div>
-
-        <div class="matches-section">
-          <h3>Matches</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Match</th>
-                <th>Players</th>
-                <th>Score</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="matchBody"></tbody>
-          </table>
-          ${
-            localStorage.getItem("userType") === "admin"
-              ? `<button onclick="addMatchRow()">Add Match</button>`
-              : ""
-          }
+              return `
+                  <div class="bracket-match">
+                    <span class="match-pair">${player1} <b>vs</b> ${player2}</span>
+                    <span class="match-date">${dateStr}</span>
+                    ${result}
+                  </div>
+                `;
+            })
+            .join("")}
         </div>
       </div>
     `;
-
-    renderPlayers();
-    renderMatches();
+  } else {
+    matchesHtml = `<div class='tournament-empty-message'><h3>No matches scheduled for this round yet.</h3></div>`;
   }
 
-  function addPlayerRow() {
-    const tbody = document.getElementById("playersBody");
-    const newRow = document.createElement("tr");
+  container.innerHTML = `
+    <div class="tournament-hero-content">
+      <h1>${tournament.name}</h1>
+      <div class="tournament-hero-info">
+        <p><strong>Start Date:</strong> ${new Date(
+          tournament.startDate
+        ).toLocaleDateString()}</p>
+        <p><strong>Status:</strong> ${tournament.status}</p>
+        <h3>Players</h3>
+        <ul>
+          ${tournament.players
+            .map((player) => `<li>${player.email} - ${player.status}</li>`)
+            .join("")}
+        </ul>
+      </div>
+      ${matchesHtml}
+    </div>
+  `;
+}
 
-    newRow.innerHTML = `
-      <td contenteditable="true"></td>
-      <td>
-        <button class="save" onclick="savePlayer(this)">Save</button>
-      </td>
-    `;
-    tbody.appendChild(newRow);
+// Join Tournament handler
+window.joinTournament = async function (tournamentId) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/tournaments/${tournamentId}/join`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    if (!response.ok) throw new Error("Failed to join tournament");
+    showSuccess("Request to join tournament sent!");
+    fetchTournaments();
+  } catch (error) {
+    showError("Could not join tournament.");
   }
+};
 
-  function savePlayer(button) {
-    const row = button.parentNode.parentNode;
-    const playerName = row.cells[0].innerText;
+// Error handling
+function showError(message) {
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "error fade-in";
+  errorDiv.textContent = message;
+  document.body.appendChild(errorDiv);
+  setTimeout(() => errorDiv.remove(), 3000);
+}
 
-    if (playerName && selectedTournament) {
-      if (!selectedTournament.players) selectedTournament.players = [];
-      selectedTournament.players.push(playerName);
-      localStorage.setItem(
-        "selectedTournament",
-        JSON.stringify(selectedTournament)
-      );
-      renderPlayers();
-    }
-  }
-
-  function deletePlayer(index) {
-    if (selectedTournament && selectedTournament.players) {
-      selectedTournament.players.splice(index, 1);
-      localStorage.setItem(
-        "selectedTournament",
-        JSON.stringify(selectedTournament)
-      );
-      renderPlayers();
-    }
-  }
-
-  function renderPlayers() {
-    const tbody = document.getElementById("playersBody");
-    if (!tbody || !selectedTournament) return;
-
-    tbody.innerHTML = "";
-
-    if (
-      !selectedTournament.players ||
-      selectedTournament.players.length === 0
-    ) {
-      tbody.innerHTML = "<tr><td colspan='2'>No players added.</td></tr>";
-    } else {
-      selectedTournament.players.forEach((player, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${player}</td>
-            <td>
-              ${
-                localStorage.getItem("userType") === "admin"
-                  ? `<button class="delete" onclick="deletePlayer(${index})">Delete</button>`
-                  : ""
-              }
-            </td>
-          </tr>
-        `;
-      });
-    }
-  }
-
-  function addMatchRow() {
-    const tbody = document.getElementById("matchBody");
-    const newRow = document.createElement("tr");
-
-    newRow.innerHTML = `
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td>
-        <button class="save" onclick="saveMatch(this)">Save</button>
-      </td>
-    `;
-    tbody.appendChild(newRow);
-  }
-
-  function saveMatch(button) {
-    const row = button.parentNode.parentNode;
-    const matchName = row.cells[0].innerText;
-    const players = row.cells[1].innerText;
-    const score = row.cells[2].innerText;
-
-    if (matchName && players && score && selectedTournament) {
-      if (!selectedTournament.matches) selectedTournament.matches = [];
-      selectedTournament.matches.push({ matchName, players, score });
-      localStorage.setItem(
-        "selectedTournament",
-        JSON.stringify(selectedTournament)
-      );
-      renderMatches();
-    }
-  }
-
-  function deleteMatch(index) {
-    if (selectedTournament && selectedTournament.matches) {
-      selectedTournament.matches.splice(index, 1);
-      localStorage.setItem(
-        "selectedTournament",
-        JSON.stringify(selectedTournament)
-      );
-      renderMatches();
-    }
-  }
-
-  function renderMatches() {
-    const tbody = document.getElementById("matchBody");
-    if (!tbody || !selectedTournament) return;
-
-    tbody.innerHTML = "";
-
-    if (
-      !selectedTournament.matches ||
-      selectedTournament.matches.length === 0
-    ) {
-      tbody.innerHTML = "<tr><td colspan='4'>No matches added.</td></tr>";
-    } else {
-      selectedTournament.matches.forEach((match, index) => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${match.matchName}</td>
-            <td>${match.players}</td>
-            <td>${match.score}</td>
-            <td>
-              ${
-                localStorage.getItem("userType") === "admin"
-                  ? `<button class="delete" onclick="deleteMatch(${index})">Delete</button>`
-                  : ""
-              }
-            </td>
-          </tr>
-        `;
-      });
-    }
-  }
-
-  // Initialize
-  checkAuth();
-
-  // Add to window for global access
-  window.toggleMenu = toggleMenu;
-  window.addTournamentRow = addTournamentRow;
-  window.saveTournament = saveTournament;
-  window.editTournament = editTournament;
-  window.deleteTournament = deleteTournament;
-  window.searchTournament = searchTournament;
-  window.viewTournamentDetails = viewTournamentDetails;
-  window.addPlayerRow = addPlayerRow;
-  window.savePlayer = savePlayer;
-  window.deletePlayer = deletePlayer;
-  window.addMatchRow = addMatchRow;
-  window.saveMatch = saveMatch;
-  window.deleteMatch = deleteMatch;
-});
+// Success message
+function showSuccess(message) {
+  const successDiv = document.createElement("div");
+  successDiv.className = "success fade-in";
+  successDiv.textContent = message;
+  document.body.appendChild(successDiv);
+  setTimeout(() => successDiv.remove(), 3000);
+}
