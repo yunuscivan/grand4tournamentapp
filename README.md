@@ -7,4 +7,4 @@ An online application designed to help organizers plan and manage various types 
 - **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
-- **Project Management:** Trello, GitHub, Google Docs
+- **Project Management:** Trello, GitHub, render, and Google Docs
